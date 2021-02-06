@@ -8,7 +8,7 @@ exports.handler = async function(event, context) {
         repo: 'data'
     });
     if (result.status > 299 || result.status < 200) return { statusCode: result.status };
-    const listing = result.data.filter(pr => pr.labels.indexOf('editable') > -1).map(pr => ({
+    const listing = result.data.filter(pr => pr.labels.some(({ name }) => name.indexOf('editable') !== -1)).map(pr => ({
         name: pr.title,
         id: pr.number,
         created: pr.created_at,
