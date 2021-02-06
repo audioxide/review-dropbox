@@ -70,10 +70,11 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
     return acc.concat(md);
 }, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").replace(/'/g, "’").trim();
 
-const uploadContent = (client, branch, path, segments) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+const uploadContent = (client, branch, path, sha, segments) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
     branch,
     path,
+    sha,
     message: `Content change by ${author}`,
     content: btoa('---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n'))
 });
@@ -109,7 +110,7 @@ exports.handler = async function(event, context) {
             content: '---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n')
         }),
     }; */
-    const uploadResponse = await uploadContent(client, ref, file.path, segments);
+    const uploadResponse = await uploadContent(client, ref, file.path, fileContents.data.sha, segments);
     if (uploadResponse.status > 299 || uploadResponse.status < 200) return { statusCode: uploadResponse.status, body: JSON.stringify(uploadResponse) };
     return { statusCode: 200 };
 };
