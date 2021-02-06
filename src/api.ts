@@ -15,7 +15,7 @@ document.cookie.split(';').forEach(cookie => {
     cookies[key] = val;
 });
 
-let accessToken: string?;
+let accessToken: string | null | undefined;
 if (cookieName in cookies) {
     accessToken = cookies[cookieName];
     window.sessionStorage.setItem(storageName, cookies[cookieName]);
