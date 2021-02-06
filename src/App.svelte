@@ -1,19 +1,11 @@
 <script>
 	import './TailwindStyles.svelte';
+	import { Router } from 'svelte-router-spa';
+	import { routes } from './routes';
 
 	const message = 'Learn Svelte';
 </script>
 
-<style>
-	.App-logo {
-		animation: App-logo-scale infinite 1.6s ease-in-out alternate;
-	}
-	@keyframes App-logo-scale {
-		from {
-			transform: scale(1);
-		}
-		to {
-			transform: scale(1.06);
-		}
-	}
-</style>
+<div class="bg-gray-50">
+	<Router {routes} />
+</div>
