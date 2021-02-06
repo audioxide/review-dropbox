@@ -78,14 +78,13 @@ const uploadContent = (client, branch, path, segments) => client.request('PUT /r
     content: btoa('---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n'))
 });
 
-const retBlob = (data) => ({ statusCode: 200, body: JSON.stringify(data, null, 2) });
+// const retBlob = (data) => ({ statusCode: 200, body: JSON.stringify(data, null, 2) });
 
 // TODO: Improve error handling
 exports.handler = async function(event, context) {
     const payload = JSON.parse(event.body);
     const client = new Octokit({ auth: payload.token });
     const ref = payload.branch;
-    return retBlob({ payload, requestType: typeof client.request });
     const fileList = await getContent(client, ref, 'data/posts');
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
     const file = fileList.data.find(file => file.name.indexOf(ref) > -1);
