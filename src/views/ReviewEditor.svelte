@@ -24,7 +24,7 @@
 
     function upload() {
         // TODO: Deal with async stuff
-        api.uploadReview($content, $tracks, $score);
+        api.uploadReview(review.branch, $content, $tracks, $score);
     }
 </script>
 

@@ -33,8 +33,8 @@ const parseContent = (encodedContent) => {
     // The file has to have content, and it has to have separators
     if (decodedData.length === 0 || !decodedData.match(segmentDetector)) throw Error('Malformed file');
     // Split the segments to get legal YAML
-    const segments = fileData.split(segmentDivisor);
-    return segements.map(YAML.parse);
+    const segments = decodedData.split(segmentDivisor);
+    return segments.map(segment => YAML.parse(segment));
 };
 
 const getReview = (segments) => {
@@ -49,6 +49,8 @@ const getReview = (segments) => {
 };
 
 const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, insert }) => {
+    // TODO: Handle this better, these are usually images
+    if (typeof insert === 'object') return acc;
     let md = insert;
     if (attributes) {
         if (attributes.link) {
@@ -68,14 +70,14 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
         }
     }
     return acc.concat(md);
-}, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").trim();
+}, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").replace(/'/g, "’").trim();
 
 const uploadContent = (branch, path, segments) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
     branch,
     path,
     message: `Content change by ${author}`,
-    content: btoa(segments.map(segment => YAML.stringify(segment)).join('\n---\n'))
+    content: btoa('---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n'))
 });
 
 exports.handler = async function(event, context) {

@@ -5,6 +5,7 @@
     "test": "web-test-runner \"src/**/*.test.ts\""
   },
   "dependencies": {
+    "@octokit/auth-app": "^2.11.0",
     "@octokit/core": "^3.2.5",
     "@snowpack/plugin-webpack": "^2.3.0",
     "autoprefixer": "^10.2.4",

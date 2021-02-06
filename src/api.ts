@@ -3,7 +3,8 @@ import { writable, get } from 'svelte/store';
 type Review = {
     name: string,
     id: number,
-    created: string
+    created: string,
+    branch: string,
 };
 
 class ApiProvider {
@@ -35,11 +36,12 @@ class ApiProvider {
         return reviewArr.find(item => item.id === id);
     }
 
-    async uploadReview(contentDeltas: object, tracks: string[], score: number) {
+    async uploadReview(branch: string, contentDeltas: object, tracks: string[], score: number) {
         const result = await fetch('/api/upload', {
             method: 'POST',
             body: JSON.stringify({
                 token: this.accessToken,
+                branch,
                 content: contentDeltas,
                 tracks,
                 score,
