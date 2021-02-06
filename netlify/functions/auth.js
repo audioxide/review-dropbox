@@ -6,7 +6,8 @@ const auth = createAppAuth({
 });
 
 const redirectObj = {
-    status: 302,
+    statusCode: 302,
+    body: '',
     headers: {
         location: '/'
     }
@@ -20,9 +21,8 @@ const redirect = (token) => {
 };
 
 exports.handler = async function(event, context) {
-    const payload = JSON.parse(event.body);
-    if (!('code' in payload)) return redirect();
-    const { code } = payload;
+    if (!('code' in event.queryStringParameters)) return redirect();
+    const { code } = event.queryStringParameters;
     const oauthAuthentication = await auth({ type: 'oauth', code });
     return redirect(oauthAuthentication.token);
 };

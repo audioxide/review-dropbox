@@ -1,6 +1,8 @@
 <script>
     import api from '../api';
 
+    const githubLoginUrl = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.SNOWPACK_PUBLIC_GITHUB_CLIENT_ID}&scope=repo`;
+
     function fakeLogin() {
         api.setToken('TEST');
     }
@@ -12,7 +14,7 @@
         <img class="h-12 w-12" src="/github-logo.svg" alt="ChitChat Logo">
         </div>
         <div>
-            <p class="text-center"><a class="text-xl font-medium" href="#" on:click={fakeLogin}>Login with GitHub</a></p>
+            <p class="text-center"><a class="text-xl font-medium" href={githubLoginUrl}>Login with GitHub</a></p>
         </div>
     </div>
 </main>
