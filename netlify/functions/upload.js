@@ -89,7 +89,7 @@ exports.handler = async function(event, context) {
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
     const file = fileList.data.find(file => file.name.indexOf(ref) > -1);
     if (!file) return { statusCode: 404 };
-    const fileContents = await getContent(ref, file.path);
+    const fileContents = await getContent(client, ref, file.path);
     if (fileContents.status > 299 || fileContents.status < 200) return { statusCode: fileContents.status };
     const segments = parseContent(fileContents.data.content);
     const review = getReview(segments);
