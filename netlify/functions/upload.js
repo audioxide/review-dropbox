@@ -1,8 +1,6 @@
 const { Octokit }= require('@octokit/core');
 const YAML = require('yaml');
 
-const client = new Octokit();
-
 const repoParams = {
     owner: 'audioxide',
     repo: 'data',
@@ -18,7 +16,7 @@ const btoa = (unencodedData) => {
     return buff.toString('base64');
 }
 
-const getContent = (ref, path) => client.request('GET /repos/{owner}/{repo}/contents/{path}', {
+const getContent = (client, ref, path) => client.request('GET /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
     ref,
     path,
@@ -72,7 +70,7 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
     return acc.concat(md);
 }, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").replace(/'/g, "’").trim();
 
-const uploadContent = (branch, path, segments) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+const uploadContent = (client, branch, path, segments) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
     branch,
     path,
@@ -82,8 +80,9 @@ const uploadContent = (branch, path, segments) => client.request('PUT /repos/{ow
 
 exports.handler = async function(event, context) {
     const payload = JSON.parse(event.body);
+    const client = new Octokit({ auth: payload.token });
     const ref = payload.branch;
-    const fileList = await getContent(ref, 'data/posts');
+    const fileList = await getContent(client, ref, 'data/posts');
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
     const file = fileList.data.find(file => file.name.indexOf(ref) > -1);
     if (!file) return { statusCode: 404 };
@@ -98,15 +97,16 @@ exports.handler = async function(event, context) {
         fraction: payload.score/10
     };
     review.review = deltaToMarkdown(payload.content);
-    return {
+
+    /* return {
         statusCode: 200,
         body: JSON.stringify({
             ref,
             path: file.path,
-            content: segments.map(segment => YAML.stringify(segment)).join('\n---\n')
+            content: '---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n')
         }),
-    };
-    // const uploadResponse = await uploadContent(ref, file.path, segments);
-    // if (uploadResponse.status > 299 || uploadResponse.status < 200) return { statusCode: uploadResponse.status };
+    }; */
+    const uploadResponse = await uploadContent(client, ref, file.path, segments);
+    if (uploadResponse.status > 299 || uploadResponse.status < 200) return { statusCode: uploadResponse.status, body: JSON.stringify(uploadResponse) };
     return { statusCode: 200 };
 };
