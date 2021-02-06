@@ -16,7 +16,7 @@ const redirectObj = {
 const redirect = (token) => {
     const response = { ...redirectObj };
     if (!token) return response;
-    response.headers["Set-Cookie"] = `github-token=${token}; Path=/; Secure;`;
+    response.headers["Set-Cookie"] = `__Host-github-token=${token}; Path=/; Secure;`;
     return response;
 };
 

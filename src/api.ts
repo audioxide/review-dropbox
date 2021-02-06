@@ -7,23 +7,36 @@ type Review = {
     branch: string,
 };
 
+const cookieName = '__Host-github-token';
+const storageName = 'gitHubToken';
+const cookies: { [key: string]: string } = {};
+document.cookie.split(';').forEach(cookie => {
+    const [key, val] = cookie.trim().split('=');
+    cookies[key] = val;
+});
+
+let accessToken: string?;
+if (cookieName in cookies) {
+    accessToken = cookies[cookieName];
+    window.sessionStorage.setItem(storageName, cookies[cookieName]);
+} else if (storageName in window.sessionStorage) {
+    accessToken = window.sessionStorage.getItem(storageName);
+}
+
 class ApiProvider {
-    accessToken = writable('');
-    isAuthenticated = false;
+    accessToken = accessToken;
+    isAuthenticated = accessToken && accessToken.length > 0;
     reviews = writable([] as Review[]);
 
     constructor() {
-        this.accessToken.subscribe((value) => {
+        /* this.accessToken.subscribe((value) => {
             if (typeof value === 'string' && value.length > 0) {
                 this.isAuthenticated = true;
                 return;
             }
             this.isAuthenticated = false;
-        });
-    }
+        }); */
 
-    setToken(token: string) {
-        this.accessToken.set(token);
     }
 
     getReviews() {

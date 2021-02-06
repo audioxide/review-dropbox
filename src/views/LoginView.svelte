@@ -2,10 +2,6 @@
     import api from '../api';
 
     const githubLoginUrl = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.SNOWPACK_PUBLIC_GITHUB_CLIENT_ID}&scope=repo`;
-
-    function fakeLogin() {
-        api.setToken('TEST');
-    }
 </script>
 
 <main class="flex items-center h-screen">
