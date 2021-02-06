@@ -80,7 +80,7 @@ const uploadContent = (branch, path, segments) => client.request('PUT /repos/{ow
 
 exports.handler = async function(event, context) {
     const payload = JSON.parse(event.body);
-    const ref = 'review-black-country-new-road-for-the-first-time';
+    const ref = payload.branch;
     const fileList = await getContent(ref, 'data/posts');
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
     const file = fileList.data.find(file => file.name.indexOf(ref) > -1);
