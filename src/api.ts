@@ -1,9 +1,15 @@
 import { writable, get } from 'svelte/store';
 
+type Review = {
+    name: string,
+    id: number,
+    created: string
+};
+
 class ApiProvider {
     accessToken = writable('');
     isAuthenticated = false;
-    reviews = writable([]);
+    reviews = writable([] as Review[]);
 
     constructor() {
         this.accessToken.subscribe((value) => {
@@ -29,7 +35,7 @@ class ApiProvider {
         return reviewArr.find(item => item.id === id);
     }
 
-    async uploadReview(contentDeltas, tracks, score) {
+    async uploadReview(contentDeltas: object, tracks: string[], score: number) {
         const result = await fetch('/api/upload', {
             method: 'POST',
             body: JSON.stringify({
