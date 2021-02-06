@@ -10,7 +10,7 @@
         <ul class="mt-8 divide-y divide-gray-100">
             {#each $reviews as review, i}
             <li class="hover:bg-gray-100 py-5 rounded-sm px-3">
-                <h3 class="text-xl"><a href={`review/${review.slug}`}>{review.name}</a></h3>
+                <h3 class="text-xl"><a href={`review/${review.id}`}>{review.name}</a></h3>
                 <p>{review.created.toString()}</p>
             </li>
             {/each}

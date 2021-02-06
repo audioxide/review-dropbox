@@ -6,8 +6,8 @@
     export let currentRoute;
 
     const { tracks, score, content } = editingPost;
-    const slug = currentRoute.namedParams.slug;
-    const review = api.getReview(slug);
+    const id = currentRoute.namedParams.id;
+    const review = api.getReview(Number(id));
     let editingTrack: string;
 
     function addTrack() {

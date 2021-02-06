@@ -96,7 +96,15 @@ exports.handler = async function(event, context) {
         fraction: payload.score/10
     };
     review.review = deltaToMarkdown(payload.content);
-    const uploadResponse = await uploadContent(ref, file.path, segments);
-    if (uploadResponse.status > 299 || uploadResponse.status < 200) return { statusCode: uploadResponse.status };
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            ref,
+            path: file.path,
+            content: segments.map(segment => YAML.stringify(segment)).join('\n---\n')
+        }),
+    };
+    // const uploadResponse = await uploadContent(ref, file.path, segments);
+    // if (uploadResponse.status > 299 || uploadResponse.status < 200) return { statusCode: uploadResponse.status };
     return { statusCode: 200 };
 };

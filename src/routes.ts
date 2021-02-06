@@ -18,7 +18,7 @@ const routes = [
       onlyIf: { guard: userIsAuthenticated, redirect: '/' },
   },
   {
-    name: 'review/:slug',
+    name: 'review/:id',
     component: ReviewEditor,
     onlyIf: { guard: userIsAuthenticated, redirect: '/' },
   },
