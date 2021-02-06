@@ -21,11 +21,16 @@
     const spliceTrack = (trackToRemove: string) => () => {
         tracks.update(arr => arr.filter(track => track !== trackToRemove));
     }
+
+    function upload() {
+        // TODO: Deal with async stuff
+        api.uploadReview($content, $tracks, $score);
+    }
 </script>
 
 <main class="h-screen flex flex-col justify-center">
     <section class="container mx-auto p-8 rounded-xl shadow-md bg-white h-4/5 flex flex-col">
-        <h1 class="text-3xl">{$review.name}</h1>
+        <h1 class="text-3xl">{review.name}</h1>
         <div class="relative flex-grow">
             <ContentEditor {content} />
         </div>
@@ -45,6 +50,6 @@
             <input class="border p-1 flex-grow" placeholder="Track name" type="text" bind:value={editingTrack} on:keypress={e => e.code === 'Enter' ? addTrack() : null } /><button class="p-1 bg-blue-500 text-white px-2 rounded-r-md" on:click={addTrack}>+</button>
             {/if}
         </span>
-        <button class="p-3 bg-blue-500 hover:bg-blue-700 text-white rounded-md inline-block lg:w-20 md:w-1/4 w-auto">Upload</button>
+        <button class="p-3 bg-blue-500 hover:bg-blue-700 text-white rounded-md inline-block lg:w-20 md:w-1/4 w-auto" on:click={upload}>Upload</button>
     </section>
 </main>

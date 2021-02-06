@@ -1,8 +1,9 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 class ApiProvider {
     accessToken = writable('');
     isAuthenticated = false;
+    reviews = writable([]);
 
     constructor() {
         this.accessToken.subscribe((value) => {
@@ -19,23 +20,29 @@ class ApiProvider {
     }
 
     getReviews() {
-        const reviews = writable([]);
-        setTimeout(() => reviews.set([
-            { name: 'Shame // Drunk Tank Pink', slug: 'shame-drunk-tank-pink', created: new Date() },
-            { name: 'Goan Dog // Call Your Mum', slug: 'goan-dog-call-your-mum', created: new Date() },
-        ]), 500);
-        return reviews;
+        fetch('/api/reviews').then(r => r.json()).then(this.reviews.set);
+        return this.reviews;
     }
 
-    getReview(slug: string) {
-        const reviewObj = { name: 'Shame // Drunk Tank Pink', slug: 'shame-drunk-tank-pink', created: new Date() };
-        const review = writable(reviewObj);
-        setTimeout(() => review.set({
-            ...reviewObj,
-
-        }), 500);
-        return review;
+    getReview(id: number) {
+        const reviewArr = get(this.reviews);
+        return reviewArr.find(item => item.id === id);
     }
+
+    async uploadReview(contentDeltas, tracks, score) {
+        const result = await fetch('/api/upload', {
+            method: 'POST',
+            body: JSON.stringify({
+                token: this.accessToken,
+                content: contentDeltas,
+                tracks,
+                score,
+            })
+        });
+        if (result.status !== 200) throw Error('An error occurred during upload.');
+        return true;
+    }
+
 }
 
 export default new ApiProvider();
