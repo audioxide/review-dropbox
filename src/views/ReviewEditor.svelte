@@ -34,7 +34,6 @@
         <div class="relative flex-grow">
             <ContentEditor {content} />
         </div>
-        {JSON.stringify($content, null, 2)}
         <label>
             <span class="text-gray-700 block pt-5 pb-2">Score</span>
             <input class="border w-10" bind:value={$score} type="number" min="0" max="10" step="1" /><span class="text-gray-700 pl-2">out of 10</span>
