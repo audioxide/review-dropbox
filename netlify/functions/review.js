@@ -83,7 +83,7 @@ const getReview = (segments, authorId) => {
     const [metadata, ...contentSegments] = segments;
     let reviewObj = contentSegments.find(obj => obj.author.toLowerCase() === authorId);
     if (!reviewObj) {
-        reviewObj = { author: authorId, tracks: [], review: '' };
+        reviewObj = { author: authorId, review: '', tracks: [], score: { score: 0, max: 10, fraction: 0 } };
         segments.push(reviewObj);
     }
     return reviewObj;
