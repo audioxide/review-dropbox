@@ -20,7 +20,8 @@ const btoa = (unencodedData) => {
 }
 
 const getAuthor = async (client) => {
-    const { login } = await client.request('GET /user');
+    const { data: { login } } = await client.request('GET /user');
+    if (!login) throw Error('Unable to retrieve username');
     const [id, matchedAuthor] = Object.entries(await authors)
         .find(([_, author]) => author?.links?.github === login);
     return {
