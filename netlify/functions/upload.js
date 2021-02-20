@@ -2,7 +2,7 @@ const { Octokit }= require('@octokit/core');
 const fetch = require('node-fetch');
 const YAML = require('yaml');
 
-let authors = fetch('https://api.audioxide.com/authors.json').then(r => r.json());
+const authors = fetch('https://api.audioxide.com/authors.json').then(r => r.json());
 
 const repoParams = {
     owner: 'audioxide',
@@ -19,7 +19,7 @@ const btoa = (unencodedData) => {
     return buff.toString('base64');
 }
 
-const getAuthor = async () => {
+const getAuthor = async (client) => {
     const { login } = await client.request('GET /user');
     const [id, matchedAuthor] = Object.entries(await authors)
         .find(([_, author]) => author?.links?.github === login);
@@ -94,10 +94,10 @@ const uploadContent = (client, branch, path, sha, segments, author) => client.re
 
 // TODO: Improve error handling
 exports.handler = async function(event, context) {
-    const author = await getAuthor();
-    if (!author) throw Error('Audioxide author could not be resolved from your GitHub user.');
     const payload = JSON.parse(event.body);
     const client = new Octokit({ auth: payload.token });
+    const author = await getAuthor(client);
+    if (!author) throw Error('Audioxide author could not be resolved from your GitHub user.');
     const ref = payload.branch;
     const fileList = await getContent(client, ref, 'data/posts');
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
