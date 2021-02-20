@@ -1,5 +1,8 @@
 const { Octokit }= require('@octokit/core');
+const fetch = require('node-fetch');
 const YAML = require('yaml');
+
+let authors = fetch('https://api.audioxide.com/authors.json').then(r => r.json());
 
 const repoParams = {
     owner: 'audioxide',
@@ -16,14 +19,22 @@ const btoa = (unencodedData) => {
     return buff.toString('base64');
 }
 
+const getAuthor = async () => {
+    const { login } = await client.request('GET /user');
+    const [id, matchedAuthor] = Object.entries(await authors)
+        .find(([_, author]) => author?.links?.github === login);
+    return {
+        id,
+        ...matchedAuthor,
+    };
+}
+
 const getContent = (client, ref, path) => client.request('GET /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
     ref,
     path,
 });
 
-// TODO: Make this dynamic
-const author = 'andrew';
 const segmentDetector = /(^|\r?\n?)---\r?\n/;
 const segmentDivisor = /\r?\n---\r?\n/;
 const parseContent = (encodedContent) => {
@@ -35,12 +46,12 @@ const parseContent = (encodedContent) => {
     return segments.map(segment => YAML.parse(segment));
 };
 
-const getReview = (segments) => {
+const getReview = (segments, authorId) => {
     // Metadata is always first, the rest is content
     const [metadata, ...contentSegments] = segments;
-    let reviewObj = contentSegments.find(obj => obj.author.toLowerCase() === author.toLowerCase());
+    let reviewObj = contentSegments.find(obj => obj.author.toLowerCase() === authorId);
     if (!reviewObj) {
-        reviewObj = { author };
+        reviewObj = { author: authorId };
         segments.push(reviewObj);
     }
     return reviewObj;
@@ -70,12 +81,12 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
     return acc.concat(md);
 }, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").replace(/'/g, "’").trim();
 
-const uploadContent = (client, branch, path, sha, segments) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+const uploadContent = (client, branch, path, sha, segments, author) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
     branch,
     path,
     sha,
-    message: `Content change by ${author}`,
+    message: `Content change by ${author.name}`,
     content: btoa('---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n'))
 });
 
@@ -83,6 +94,8 @@ const uploadContent = (client, branch, path, sha, segments) => client.request('P
 
 // TODO: Improve error handling
 exports.handler = async function(event, context) {
+    const author = await getAuthor();
+    if (!author) throw Error('Audioxide author could not be resolved from your GitHub user.');
     const payload = JSON.parse(event.body);
     const client = new Octokit({ auth: payload.token });
     const ref = payload.branch;
@@ -93,7 +106,7 @@ exports.handler = async function(event, context) {
     const fileContents = await getContent(client, ref, file.path);
     if (fileContents.status > 299 || fileContents.status < 200) return { statusCode: fileContents.status };
     const segments = parseContent(fileContents.data.content);
-    const review = getReview(segments);
+    const review = getReview(segments, author.id);
     review.tracks = payload.tracks;
     review.score = {
         score: payload.score,
