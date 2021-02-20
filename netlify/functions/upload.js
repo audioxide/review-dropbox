@@ -123,7 +123,7 @@ exports.handler = async function(event, context) {
             content: '---\n' + segments.map(segment => YAML.stringify(segment)).join('\n---\n')
         }),
     }; */
-    const uploadResponse = await uploadContent(client, ref, file.path, fileContents.data.sha, segments);
+    const uploadResponse = await uploadContent(client, ref, file.path, fileContents.data.sha, segments, author);
     if (uploadResponse.status > 299 || uploadResponse.status < 200) return { statusCode: uploadResponse.status, body: JSON.stringify(uploadResponse) };
     return { statusCode: 200 };
 };
