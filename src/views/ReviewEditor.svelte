@@ -10,6 +10,8 @@
     const reviewInfo = api.getReviewInfo(Number(id));
     let editingTrack: string;
 
+    let uploadPromise = Promise.resolve(false);
+
     api.getReview(reviewInfo.branch).then(review => {
         content.set({ ops: review.review });
         tracks.set(review.tracks);
@@ -30,9 +32,24 @@
 
     function upload() {
         // TODO: Deal with async stuff
-        api.uploadReview(reviewInfo.branch, $content, $tracks, $score);
+        uploadPromise = api.uploadReview(reviewInfo.branch, $content, $tracks, $score);
     }
 </script>
+
+<style>
+    @keyframes success-highlight {
+        from {
+            background-color: #10B981;
+        }
+        to {
+            background-color: #3B82F6;
+        }
+    }
+
+    .success-highlight {
+        animation: 1s ease-in-out success-highlight forwards;
+    }
+</style>
 
 <main class="h-screen flex flex-col justify-center">
     <section class="container mx-auto p-8 rounded-xl shadow-md bg-white h-4/5 flex flex-col">
@@ -55,6 +72,13 @@
             <input class="border p-1 flex-grow" placeholder="Track name" type="text" bind:value={editingTrack} on:keypress={e => e.code === 'Enter' ? addTrack() : null } /><button class="p-1 bg-blue-500 text-white px-2 rounded-r-md" on:click={addTrack}>+</button>
             {/if}
         </span>
-        <button class="p-3 bg-blue-500 hover:bg-blue-700 text-white rounded-md inline-block lg:w-20 md:w-1/4 w-auto" on:click={upload}>Upload</button>
+        {#await uploadPromise}
+        <button class="p-3 bg-gray-300 text-black rounded-md inline-block lg:w-32 md:w-1/4 w-auto">Uploading...</button>
+        {:then showSuccess}
+        <button class={`p-3 bg-blue-500 hover:bg-blue-700 text-white rounded-md inline-block lg:w-20 md:w-1/4 w-auto ${showSuccess ? 'success-highlight' : ''}`} on:click={upload}>Upload</button>
+        {:catch error}
+        <p class="text-red-700">{error.message}</p>
+        <button class="p-3 bg-blue-500 hover:bg-blue-700 text-white rounded-md inline-block lg:w-32 md:w-1/4 w-auto" on:click={upload}>Retry upload</button>
+        {/await}
     </section>
 </main>
