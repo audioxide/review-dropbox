@@ -97,7 +97,7 @@ const markdownToDelta = (str) => {
     let isLink = false;
     const newInsertion = () => {
         const block = { insert: '' };
-        if (isItalic || isBold) {
+        if (isItalic || isBold || isLink) {
             block.attributes = {};
         }
         if (isItalic === true) {
