@@ -172,7 +172,7 @@ exports.handler = async function(event, context) {
     const fileList = await getContent(client, ref, 'data/posts');
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
     // We pluralise the branch name's post type as Fred tends to name branches with the singular
-    const file = fileList.data.find(file => file.name.indexOf(ref) > -1 || file.name.indexOf(ref.replace(/^([^\-]+?)-/, '$1s-') > -1));
+    const file = fileList.data.find(file => file.name.indexOf(ref) > -1 || file.name.indexOf(ref.replace(/^([^\-]+?)-/, '$1s-')) > -1);
     if (!file) return { statusCode: 404 };
     const fileContents = await getContent(client, ref, file.path);
     if (fileContents.status > 299 || fileContents.status < 200) return { statusCode: fileContents.status };
