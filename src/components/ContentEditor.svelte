@@ -13,6 +13,7 @@ import type { Writable } from 'svelte/store';
     let editor: Quill;
 
     onMount(() => {
+        var contentObj: { ops: {}[] };
         editor = new Quill(container, {
             modules: {
                 toolbar: [
@@ -23,9 +24,11 @@ import type { Writable } from 'svelte/store';
             theme: 'snow'
         });
         editor.on('text-change', () => {
-            content.set(editor.getContents());
+            contentObj = editor.getContents();
+            content.set(contentObj);
         });
         content.subscribe((newContent) => {
+            if (newContent === contentObj) return;
             editor.setContents(newContent.ops);
         });
     });
