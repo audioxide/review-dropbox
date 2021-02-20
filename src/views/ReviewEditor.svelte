@@ -13,7 +13,7 @@
     api.getReview(reviewInfo.branch).then(review => {
         content.set({ ops: review.review });
         tracks.set(review.tracks);
-        score.set(review.score);
+        score.set(review.score.score);
     });
 
     function addTrack() {
