@@ -7,7 +7,7 @@
     import 'quill/dist/quill.snow.css';
 import type { Writable } from 'svelte/store';
 
-    export let content: Writable<{}>;
+    export let content: Writable<{ ops: {}[] }>;
 
     let container: HTMLElement;
     let editor: Quill;
@@ -24,6 +24,9 @@ import type { Writable } from 'svelte/store';
         });
         editor.on('text-change', () => {
             content.set(editor.getContents());
+        });
+        content.subscribe((newContent) => {
+            editor.setContents(newContent.ops);
         });
     });
 

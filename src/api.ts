@@ -44,9 +44,23 @@ class ApiProvider {
         return this.reviews;
     }
 
-    getReview(id: number) {
+    getReviewInfo(id: number) {
         const reviewArr = get(this.reviews);
-        return reviewArr.find(item => item.id === id);
+        const reviewInfo = reviewArr.find(item => item.id === id);
+        if (!reviewInfo) throw Error('Could not retrieve review information');
+        return reviewInfo;
+    }
+
+    async getReview(branch: string) {
+        const result = await fetch('/api/review', {
+            method: 'POST',
+            body: JSON.stringify({
+                token: this.accessToken,
+                branch
+            })
+        });
+        if (result.status !== 200) throw Error('An error occurred retrieving review data');
+        return await result.json();
     }
 
     async uploadReview(branch: string, contentDeltas: object, tracks: string[], score: number) {

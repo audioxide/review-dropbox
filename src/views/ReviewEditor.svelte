@@ -7,8 +7,14 @@
 
     const { tracks, score, content } = editingPost;
     const id = currentRoute.namedParams.id;
-    const review = api.getReview(Number(id));
+    const reviewInfo = api.getReviewInfo(Number(id));
     let editingTrack: string;
+
+    api.getReview(reviewInfo.branch).then(review => {
+        content.set({ ops: review.review });
+        tracks.set(review.tracks);
+        score.set(review.score);
+    });
 
     function addTrack() {
         tracks.update(arr => {
@@ -24,13 +30,13 @@
 
     function upload() {
         // TODO: Deal with async stuff
-        api.uploadReview(review.branch, $content, $tracks, $score);
+        api.uploadReview(reviewInfo.branch, $content, $tracks, $score);
     }
 </script>
 
 <main class="h-screen flex flex-col justify-center">
     <section class="container mx-auto p-8 rounded-xl shadow-md bg-white h-4/5 flex flex-col">
-        <h1 class="text-3xl">{review.name}</h1>
+        <h1 class="text-3xl">{reviewInfo.name}</h1>
         <div class="relative flex-grow">
             <ContentEditor {content} />
         </div>
