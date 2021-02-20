@@ -92,9 +92,10 @@ const getReview = (segments, authorId) => {
 const markdownToDelta = (str) => {
     const markdownInst = new markdownIt();
     const markdownTokens = markdownInst.parse(str);
-    var isItalic = false;
-    var isBold = false;
-    var newInsertion = () => {
+    let isItalic = false;
+    let isBold = false;
+    let isLink = false;
+    const newInsertion = () => {
         const block = { insert: '' };
         if (isItalic || isBold) {
             block.attributes = {};
@@ -105,9 +106,12 @@ const markdownToDelta = (str) => {
         if (isBold === true) {
             block.attributes.bold = true;
         }
+        if (isLink !== false) {
+            block.attributes.link = isLink;
+        }
         return block;
     }
-    var process = (acc, item) => {
+    const process = (acc, item) => {
         let lastItem = acc[acc.length - 1];
         switch (item.type) {
             case 'text':
@@ -140,12 +144,24 @@ const markdownToDelta = (str) => {
                 }
                 acc.push(newInsertion());
                 break;
+            case 'link_open':
+                isLink = item.attrs.find(([key]) => key === 'href')[1];
+                if (lastItem.insert === '') {
+                    lastItem.attributes.link = isLink;
+                    break;
+                }
+                acc.push(newInsertion());
+                break;
             case 'em_close':
                 isItalic = false;
                 acc.push(newInsertion());
                 break;
             case 'strong_close':
                 isBold = false;
+                acc.push(newInsertion());
+                break;
+            case 'link_close':
+                isLink = false;
                 acc.push(newInsertion());
                 break;
             case 'paragraph_close':
