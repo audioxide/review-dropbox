@@ -72,11 +72,8 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
         if (attributes.italic) {
             md = `_${md}_`;
         }
-        if (attributes.header === 1) {
-            md = "\n==========" + md;
-        }
-        if (attributes.header === 2) {
-            md = "\n----------" + md;
+        if (typeof attributes.header === 'number') {
+            acc = acc.replace(/\n([^\n]+?)$/, `\n${"#".repeat(attributes.header)} $1`);
         }
     }
     return acc.concat(md);
