@@ -2,6 +2,8 @@ const { Octokit }= require('@octokit/core');
 const fetch = require('node-fetch');
 const YAML = require('yaml');
 
+YAML.scalarOptions.str.fold.lineWidth = 0;
+
 const authors = fetch('https://api.audioxide.com/authors.json').then(r => r.json());
 
 const repoParams = {
@@ -84,7 +86,7 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
         }
     }
     return acc.concat(md);
-}, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").replace(/'/g, "’").trim();
+}, '').replace(/(^|\s)"/g, "$1“").replace(/"/g, "”").replace(/'/g, "’").trim();
 
 const uploadContent = (client, branch, path, sha, segments, author) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
