@@ -64,7 +64,14 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
     let md = insert;
     if (attributes) {
         if (attributes.link) {
-            md =`[${md}](${attributes.link})`;
+            let link = attributes.link;
+            if (link.startsWith('http')) { // Simplistic check for an absolute URL
+                const urlObj = new URL(link);
+                if (urlObj.host.endsWith('audioxide.com')) {
+                    link = urlObj.pathname;
+                }
+            }
+            md =`[${md}](${link})`;
         }
         if (attributes.bold) {
             md = `**${md}**`;

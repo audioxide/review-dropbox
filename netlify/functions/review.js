@@ -145,7 +145,13 @@ const markdownToDelta = (str) => {
                 acc.push(newInsertion());
                 break;
             case 'link_open':
-                isLink = item.attrs.find(([key]) => key === 'href')[1];
+                let link = item.attrs.find(([key]) => key === 'href')[1];
+                if (link.startsWith('/')) { // Simplistic check for relative URL
+                    const urlObj = new URL('https://audioxide.com');
+                    urlObj.pathname = link;
+                    link = urlObj.href;
+                }
+                isLink = link;
                 if (lastItem.insert === '') {
                     lastItem.attributes.link = isLink;
                     break;
