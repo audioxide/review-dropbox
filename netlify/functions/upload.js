@@ -2,6 +2,8 @@ const { Octokit }= require('@octokit/core');
 const fetch = require('node-fetch');
 const YAML = require('yaml');
 
+YAML.scalarOptions.str.fold.lineWidth = 0;
+
 const authors = fetch('https://api.audioxide.com/authors.json').then(r => r.json());
 
 const repoParams = {
@@ -64,7 +66,14 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
     let md = insert;
     if (attributes) {
         if (attributes.link) {
-            md =`[${md}](${attributes.link})`;
+            let link = attributes.link;
+            if (link.startsWith('http')) { // Simplistic check for an absolute URL
+                const urlObj = new URL(link);
+                if (urlObj.host.endsWith('audioxide.com')) {
+                    link = urlObj.pathname;
+                }
+            }
+            md =`[${md}](${link})`;
         }
         if (attributes.bold) {
             md = `**${md}**`;
@@ -77,7 +86,7 @@ const deltaToMarkdown = (deltaData) => deltaData.ops.reduce((acc, { attributes, 
         }
     }
     return acc.concat(md);
-}, '').replace(/(^|\s)"/g, "“").replace(/"/g, "”").replace(/'/g, "’").trim();
+}, '').replace(/(^|\s)"/g, "$1“").replace(/"/g, "”").replace(/'/g, "’").trim();
 
 const uploadContent = (client, branch, path, sha, segments, author) => client.request('PUT /repos/{owner}/{repo}/contents/{path}', {
     ...repoParams,
@@ -99,7 +108,8 @@ exports.handler = async function(event, context) {
     const ref = payload.branch;
     const fileList = await getContent(client, ref, 'data/posts');
     if (fileList.status > 299 || fileList.status < 200) return { statusCode: fileList.status };
-    const file = fileList.data.find(file => file.name.indexOf(ref) > -1);
+    // We pluralise the branch name's post type as Fred tends to name branches with the singular
+    const file = fileList.data.find(file => file.name.indexOf(ref) > -1 || file.name.indexOf(ref.replace(/^([^\-]+?)-/, '$1s-')) > -1);
     if (!file) return { statusCode: 404 };
     const fileContents = await getContent(client, ref, file.path);
     if (fileContents.status > 299 || fileContents.status < 200) return { statusCode: fileContents.status };
